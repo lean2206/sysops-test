@@ -32,7 +32,7 @@ This project sets up an automated infrastructure using Ansible and Vagrant on a 
 Before running this project, make sure you have the following software installed on your Windows system:
 
 - [Vagrant](https://www.vagrantup.com/downloads) v2.4.1
-- [VirtualBox](https://www.virtualbox.org/) v.7.0.2
+- [VirtualBox](https://www.virtualbox.org/) v.7.0.20
 
 
 ## Execution
