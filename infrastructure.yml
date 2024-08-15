@@ -1,0 +1,15 @@
+---
+- hosts: all
+  become: true
+
+  vars: 
+    echo_server_count: 12
+    nginx_server_count: 13
+    network_name: "shared-network"
+  
+  roles:
+    - folders
+    - create-network
+    - echoserver
+    - nginx
+    - haproxy
