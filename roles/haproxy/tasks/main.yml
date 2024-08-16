@@ -1,0 +1,61 @@
+---
+- name: HAProxy setup and execution
+  block:
+    - name: HAProxy configuration
+      copy:
+        dest: /opt/haproxy/haproxy.cfg
+        content: |
+          global
+            log stdout format raw local0
+
+          defaults
+            log global
+            mode http
+            timeout connect 5000ms
+            timeout client  50000ms
+            timeout server  50000ms
+          
+          frontend http-in
+            bind *:80
+            acl is_api path_beg /api
+            acl is_statics path_reg  ^/statics(.*)
+            use_backend echoservers if is_api
+            use_backend nginxservers if is_statics
+
+          backend echoservers
+            balance roundrobin 
+            {% for i in range(0, echo_server_count) %}
+            server echo{{ i }} echo{{ i }}:8080 check
+            {% endfor %}
+          
+          backend nginxservers
+            balance uri 
+            stick-table type string size 1m expire 30m
+            stick on url
+            {% for i in range(0, nginx_server_count) %}
+            server nginx{{ i }} nginx{{ i }}:80 check
+            {% endfor %}
+
+    - name: Generate Docker Compose file
+      copy:
+        dest: /opt/haproxy/docker-compose.yml
+        content: |
+          services:
+            haproxy:
+              image: haproxy:3.0.3
+              ports:
+                - "80:80"
+              volumes:
+                - /opt/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+              networks: 
+                - {{ network_name }}
+          networks:
+            "{{ network_name }}":
+              external: true
+
+    - name: Start Docker Compose services
+      community.docker.docker_compose_v2:
+        project_src: /opt/haproxy
+        files:
+          - docker-compose.yml
+        state: present

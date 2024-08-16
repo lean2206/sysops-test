@@ -1,0 +1,26 @@
+---
+- name: Generate Docker Compose file
+  copy:
+    dest: /opt/echoserver/docker-compose.yml
+    content: |
+      services:
+      {% for i in range(0, echo_server_count) %}
+        echo{{ i }}:
+          image: gcr.io/google_containers/echoserver:1.8
+          ports:
+           - "8080"
+          networks: 
+            - {{ network_name }}
+        
+      {% endfor %}
+      networks:
+        "{{ network_name }}":
+          external: true
+
+
+- name: Start Docker Compose services
+  community.docker.docker_compose_v2:
+    project_src: /opt/echoserver
+    files:
+    - docker-compose.yml
+

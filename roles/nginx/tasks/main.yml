@@ -1,0 +1,35 @@
+- name: Nginx instances and configurations
+  copy:
+    dest: /opt/nginx/docker-compose.yml
+    content: |
+      services:
+      {% for i in range(0, nginx_server_count) %}
+        nginx{{ i }}:
+          image: nginx:latest
+          ports:
+            - "80"
+          volumes:
+            - /opt/nginx/nginx{{ i }}.conf:/etc/nginx/nginx.conf
+          networks:
+            - {{ network_name }}
+      {% endfor %}
+      
+      networks:
+        {{ network_name }}:
+          external: true
+
+
+- name: Create Nginx configuration files
+  template:
+    src: nginx.conf.j2
+    dest: "/opt/nginx/nginx{{ item }}.conf"
+  loop: "{{ range(0, nginx_server_count) }}"
+
+
+- name: Start Docker Compose services
+  community.docker.docker_compose_v2:
+    project_src: /opt/nginx
+    files:
+      - docker-compose.yml
+    state: present
+

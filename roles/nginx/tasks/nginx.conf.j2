@@ -1,0 +1,17 @@
+user  nginx;
+worker_processes  auto;
+
+# Otras configuraciones de Nginx
+events {
+    worker_connections  1024;
+}
+
+http {
+  server {
+    listen 80;
+    location / {
+      default_type text/html;
+      return 200 'Response from server {{ item }}\n';
+    }
+  }
+}

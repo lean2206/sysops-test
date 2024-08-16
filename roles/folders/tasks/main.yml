@@ -1,0 +1,10 @@
+---
+- name: folders docker-compose
+  file:
+      path: "{{ item }}"
+      state: directory
+      mode: '0755'
+  loop:
+      - /opt/echoserver
+      - /opt/haproxy
+      - /opt/nginx
